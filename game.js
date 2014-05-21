@@ -4,8 +4,17 @@ $(document).ready(function (e){
 	$('#game').on('click', 'td', function(){
 		var eye = $(this).parent().index();
 		var jay = $(this).index();
-		Minesweeper.clickSpace(eye, jay);
+			Minesweeper.clickSpace(eye, jay);
 	});
+
+	$('#game').on('contextmenu', 'td', function(e){
+		e.preventDefault();
+		var eye = $(this).parent().index();
+		var jay = $(this).index();
+		Minesweeper.flagSpace(eye, jay);
+	});
+
+
 
 	$('#game').on('click', '#reset', function(){
 		startGame();
@@ -98,11 +107,23 @@ Minesweeper = {
 				alert('!~boom~! mine at row:'+i+', col:'+j+' just blew up!');
 				this.gameOver = true;
 				this.grid[i][j].mine = false;
-			}else{
+			}else if(this.grid[i][j].flagged === false){
 				this.grid[i][j].clicked = true;
 				// console.log(i,', ', j);
 				// $('#game tr:nth-child('+(i+1)+') td:nth-child('+(j+1)+')').addClass('yellow');
 				$('#game tr:nth-child('+(i+1)+') td:nth-child('+(j+1)+')').html(this.minesAround(i,j));
+				if(this.minesAround(i,j) === 0) {
+					for(var row = i-1; row < i+2; row++){
+						for(var col = j-1; col < j+2; col++){
+							console.log(row, col);
+							try {
+								console.log('got here');
+								this.clickSpace(row, col);
+							}
+							catch(err) { }
+						}
+					}
+				}
 			}
 		}
 		else {
@@ -110,9 +131,23 @@ Minesweeper = {
 		}
 	},
 
+	flagSpace: function(i, j) {
+		if (this.gameOver === false) {
+			this.grid[i][j].flagged = this.grid[i][j].flagged ? false : true;
+
+			if(this.grid[i][j].flagged === true) {
+				$('#game tr:nth-child('+(i+1)+') td:nth-child('+(j+1)+')').html('F');
+			}else {
+				$('#game tr:nth-child('+(i+1)+') td:nth-child('+(j+1)+')').html('');
+			}
+
+		}
+	},
+
 	space: function() {
 		this.mine = false;
 		this.clicked = false;
+		this.flagged = false;
 	}
 
 };
