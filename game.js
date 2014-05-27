@@ -14,7 +14,10 @@ $(document).ready(function (e){
 		Minesweeper.flagSpace(eye, jay);
 	});
 
-
+	$('#game').on('click', '#god', function(){
+		Minesweeper.flipGodMode();
+		console.log('started new game');
+	});
 
 	$('#game').on('click', '#reset', function(){
 		startGame();
@@ -32,6 +35,7 @@ Minesweeper = {
 
 	init: function(rows) {
 		this.gameOver = false;
+		this.godMode = false;
 		this.calculateMines(rows);
 		this.buildGrid();
 		this.setMines();
@@ -102,12 +106,20 @@ Minesweeper = {
 		if (this.gameOver === false){
 			if(this.grid[i][j].clicked === true) {
 				console.log("ya already clicked here, foo.");
+			}
+			else if(this.grid[i][j].flagged === true){
+				if(this.grid[i][j].mine){
+					this.numMines--;
+					this.grid[i][j].mine = false;
+				}
+				// if(this.)
 			}else if(this.grid[i][j].mine === true) {
 				$('#game tr:nth-child('+(i+1)+') td:nth-child('+(j+1)+')').html('X');
 				alert('!~boom~! mine at row:'+i+', col:'+j+' just blew up!');
 				this.gameOver = true;
 				this.grid[i][j].mine = false;
-			}else if(this.grid[i][j].flagged === false){
+			}else{
+				console.log(this.grid[i][j]);
 				this.grid[i][j].clicked = true;
 				// console.log(i,', ', j);
 				// $('#game tr:nth-child('+(i+1)+') td:nth-child('+(j+1)+')').addClass('yellow');
@@ -131,6 +143,31 @@ Minesweeper = {
 		}
 	},
 
+	flipGodMode: function() {
+		if(this.godMode){
+			for(var i = 0; i < this.gridSize; i++){
+				for(var j = 0; j < this.gridSize; j++){
+					if(this.grid[i][j].mine && !this.grid[i][j].flagged){
+						$('#game tr:nth-child('+(i+1)+') td:nth-child('+(j+1)+')').html('');
+
+					}
+				}
+			}
+			this.godMode = false;
+		}
+		else{
+			for(var i = 0; i < this.gridSize; i++){
+				for(var j = 0; j < this.gridSize; j++){
+					if(this.grid[i][j].mine){
+						$('#game tr:nth-child('+(i+1)+') td:nth-child('+(j+1)+')').html('M');
+					}
+				}
+			}
+			this.godMode = true;
+		}
+	},
+
+
 	flagSpace: function(i, j) {
 		if (this.gameOver === false) {
 			this.grid[i][j].flagged = this.grid[i][j].flagged ? false : true;
@@ -138,7 +175,11 @@ Minesweeper = {
 			if(this.grid[i][j].flagged === true) {
 				$('#game tr:nth-child('+(i+1)+') td:nth-child('+(j+1)+')').html('F');
 			}else {
-				$('#game tr:nth-child('+(i+1)+') td:nth-child('+(j+1)+')').html('');
+				if(this.godMode === false){
+					$('#game tr:nth-child('+(i+1)+') td:nth-child('+(j+1)+')').html('');
+				}else{
+					$('#game tr:nth-child('+(i+1)+') td:nth-child('+(j+1)+')').html('M');
+				}
 			}
 
 		}
